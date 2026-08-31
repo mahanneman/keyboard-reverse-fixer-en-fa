@@ -1,4 +1,3 @@
-markdown
 [🇬🇧 English](README.md) | [🇮🇷 فارسی](README.fa.md)
 
 # 🧠 تصحیح‌کننده‌ی هوشمند کیبورد فارسی
