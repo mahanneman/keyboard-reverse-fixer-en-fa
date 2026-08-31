@@ -1,5 +1,4 @@
 
-markdown
 # 🧠 Smart Persian Keyboard Corrector – Version 2
 
 **Instantly fix mistyped Persian text** – now with **50 intelligent correction variants**, live preview, pinning, and full clipboard support.
