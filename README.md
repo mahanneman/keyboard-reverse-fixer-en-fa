@@ -1,147 +1,191 @@
 
-```markdown
+markdown
 [🇬🇧 English](README.md) | [🇮🇷 فارسی](README.fa.md)
 
-# 🧠 Smart Persian Keyboard Corrector – Version 2
+# 🎤 Vosk Voice Typing – Speech-to-Text Keyboard
 
-**Instantly fix mistyped Persian text** – now with **50 intelligent correction variants**, live preview, pinning, and full clipboard support.
+**Version 3** · Real‑time speech recognition that types directly into any application.  
+Works offline, supports 20+ languages, floats above all windows, and includes smart timers, voice commands, and a built‑in model manager.
 
-![Python](https://img.shields.io/badge/python-3.7+-blue.svg)
-![Tkinter](https://img.shields.io/badge/GUI-Tkinter-green.svg)
-![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
+[![Python](https://img.shields.io/badge/Python-3.7%2B-blue)](https://python.org)
+[![PyQt5](https://img.shields.io/badge/PyQt5-5.15-green)](https://pypi.org/project/PyQt5/)
+[![Vosk](https://img.shields.io/badge/Vosk-0.3.45-orange)](https://alphacephei.com/vosk/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
 
 ## 📌 Table of Contents
-- [What’s New in v2](#-whats-new-in-v2)
-- [Key Features](#-key-features)
-- [How It Works](#-how-it-works)
-- [Installation & Running](#-installation--running)
-- [How to Use – Step by Step](#-how-to-use--step-by-step)
-- [Use Cases](#-use-cases)
-- [Keyboard Shortcuts](#-keyboard-shortcuts)
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Installation & Setup](#-installation--setup)
+- [How to Use](#-how-to-use)
+- [Global Hotkeys](#-global-hotkeys)
+- [Voice Commands](#-voice-commands)
+- [Building Executable](#-building-an-executable-optional)
+- [Linux‑Specific Notes](#-linuxspecific-notes)
+- [Folder Structure](#-folder-structure)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing & License](#-contributing--license)
 
 ---
 
-## 🆕 What’s New in v2
-
-Version 2 is a **major upgrade** over the basic v1 (which only offered 4 fixed options). Now you get:
-
-- **50 correction variants** (up from 4) – covers almost every possible keyboard‑layout mistake.
-- **Live preview** – results update instantly as you type or paste; no “Convert” button needed.
-- **Pin your favorites** – keep the most useful corrections at the top of the list.
-- **Full keyboard shortcuts** – `Ctrl+C`, `Ctrl+V`, `Ctrl+A`, and `Ctrl+X` work everywhere.
-- **Smarter combinations** – automatically mixes Persian and English swap patterns to handle mixed errors.
-- **Right‑click context menu** – available on both input and output areas for quick copy/paste.
-- **Dark theme** – eye‑friendly, comfortable for extended use.
-- **Mouse wheel scrolling** – smoothly scroll through the long list of suggestions.
-- **Portable executable** – no Python installation required – just download and run the `.exe`.
-
----
-
-## ✨ Key Features
+## ✨ Features
 
 | Feature | Description |
 |---------|-------------|
-| **Live conversion** | As you type (or paste), up to 50 corrected versions appear instantly in the lower panel. |
-| **50 intelligent mappings** | Built from **25 Persian‑specific swaps** + **7 English layout swaps** + their smart combinations. |
-| **Pinning** | Click the 📌 button on any option to pin it to the top – useful for frequent corrections. |
-| **One‑click copy** | Click any result (or press `Ctrl+C` when focused) to copy it to your clipboard. |
-| **Full clipboard support** | Use toolbar buttons or standard shortcuts for cut/copy/paste/select‑all. |
-| **Right‑click menu** | Works on both the input box and any output label. |
-| **Dark theme** | Eye‑friendly, comfortable for extended use. |
-| **Mouse wheel scrolling** | Smoothly scroll through the long list of suggestions. |
-| **Portable executable** | No Python installation required – just download and run the `.exe`. |
+| **Real‑time recognition** | Uses the Vosk engine – no internet required, works entirely offline. |
+| **20+ languages** | Supports Persian, English, Russian, German, French, Spanish, Italian, Chinese, and many more. |
+| **Floating window** | Always‑on‑top, draggable, semi‑transparent, stays out of your way. |
+| **Smart timer** | Automatically start or stop recording after a countdown (two modes: `Off` and `On`). |
+| **Global hotkeys** | Control recording from anywhere: `Ctrl+Shift+S` (start), `Ctrl+Shift+X` (stop), `Ctrl+Shift+L` (switch language). |
+| **Voice commands** | Hands‑free control: `copy`, `paste`, `enter`, `delete all`, `undo`, and language switching. |
+| **Built‑in model manager** | Download models from the Vosk server, add your own local models, or delete unwanted ones – all from the GUI. |
+| **Bilingual UI** | Switch between Persian and English instantly. |
+| **System tray icon** | Run in the background with a tray menu for quick access. |
+| **Dark theme** | Modern, eye‑friendly interface with rounded corners and transparency. |
 
 ---
 
-## 🧠 How It Works
+## 📸 Screenshots
 
-The program starts with a **base mapping** from English keys to Persian letters (standard Windows layout). Then it builds **50 different correction maps** by applying:
+*(Add your own screenshots and update the file paths)*
 
-1. **25 Persian‑specific swaps** – e.g., `پ ↔ ب`, `ژ ↔ ف`, `گ ↔ ک`, `ش ↔ س`, `ت ↔ ن`, and many more.
-2. **7 English layout swaps** – QWERTY→AZERTY, QWERTY→DVORAK, COLEMAK, shifted left/right, numeric mis‑typing, CapsLock reversal.
-3. **Intelligent combinations** – mixes one Persian swap with one English swap, and also combines two Persian swaps, to cover complex mistakes.
+![Main window](screenshot_main.png)  
+*Floating window showing status, timer, and language selector*
 
-When you type or paste text, the app runs **all 50 mappings** on your input and displays each result in a scrollable list.  
-Non‑alphabetic characters (spaces, punctuation, digits) are preserved during conversion.
+![Model manager](screenshot_models.png)  
+*Download models, add local ones, or delete installed models*
 
 ---
 
-## 📥 Installation & Running
+## 🚀 Installation & Setup
 
-### Option 1 – Download the executable (recommended for non‑developers)
-- Go to the [Releases page](https://github.com/mahanneman/keyboard-reverse-fixer-en-fa/releases).
-- Download `keyboard_reverse_fixer_en_fa_v2.exe` from the v2.0.0 release.
-- Double‑click the `.exe` file – no Python or extra libraries needed.
+### Prerequisites
+- **Python 3.7 or higher**
+- Required Python libraries (see `requirements.txt`)
 
-### Option 2 – Run from source (for developers)
-- Ensure Python 3.7+ is installed.
-- Clone the repository:
-  ```bash
-  git clone https://github.com/mahanneman/keyboard-reverse-fixer-en-fa.git
-  cd keyboard-reverse-fixer-en-fa
-Run the script:
+### Steps
+
+#### 1. Clone the repository
+```bash
+git clone https://github.com/mahanneman/vosk-voice-typing.git
+cd vosk-voice-typing
+2. Install dependencies
+bash
+pip install -r requirements.txt
+Linux users: You may need to install portaudio and libportaudio2 first:
 
 bash
-python keyboard_reverse_fixer_en_fa_v2.py
-🖱️ How to Use – Step by Step
-Launch the application.
+sudo apt install portaudio19-dev python3-pyaudio
+3. Run the application
+bash
+python Vosk_SpeechToText_v3.py
+🧭 How to Use
+First Run
+The app scans for existing models in the models/ folder.
 
-Type or paste your English‑looking text into the upper text box.
-Example: you type ;hgfdlk – this often happens when you intended to type in Persian but forgot to switch the keyboard layout.
+If no model is found, you'll see: "No model found. Please download a model."
 
-Watch the lower area fill with up to 50 different Persian‑corrected versions – they appear in real time.
+Click the "📥 Manage Models" button to open the model manager.
 
-Find the correct one – usually it will be among the first few options (pinned ones stay on top).
+Managing Models
+In the model manager you can:
 
-Copy it in any of these ways:
+Download official Vosk models from the list (requires internet).
 
-Left‑click on the result text.
+Add a local model by selecting its folder and entering the language code (e.g., fa for Persian).
 
-Click the 📋 کپی button next to the result.
+Delete unwanted models (only those inside the models/ folder can be removed).
 
-Click on the result and press Ctrl+C on your keyboard.
+After adding a model, select it from the language dropdown in the main window.
 
-Pin any option you frequently use by clicking its 📌 button – pinned items are always shown at the top of the list.
+Start Recording
+Click the "🎤 Start" button or press Ctrl+Shift+S.
 
-🎯 Use Cases
-You typed a sentence in English while intending to type in Persian.
-Example: ;hgfdlk → the app suggests سلام as one of the results.
+Recognised text is typed automatically into the currently focused application.
 
-You are using a non‑standard keyboard layout (e.g., AZERTY, Dvorak, Colemak) and want to see the correct Persian output without changing your system settings.
+If typing fails (e.g., in restricted environments), the text is copied to the clipboard instead.
 
-You frequently switch between Persian and English keyboards and often forget which layout is active – this tool saves you from re‑typing.
+Stop Recording
+Click "⏹ Stop" or press Ctrl+Shift+X.
 
-You are a translator, editor, student, or content creator working with Persian text and need a quick, reliable fix for mis‑typed words.
+Switch Language
+Use the language dropdown in the main window, or press Ctrl+Shift+L to cycle through installed languages.
 
-You want to experiment with different Persian‑keyboard mapping alternatives (e.g., Linux vs Windows layouts) to find the one that matches your typing habits.
+You can also say "change to English" (when in Persian mode) or "persian" (when in English mode).
 
-⌨️ Keyboard Shortcuts
-Shortcut	Action
-Ctrl+C	Copy selected text (works on input area and on any output result after clicking on it)
-Ctrl+V	Paste text into the input area
-Ctrl+A	Select all text in the input area
-Ctrl+X	Cut selected text (input area only)
-Mouse wheel	Scroll the results list up/down
+Smart Timer
+Set a countdown (up to 99:59) using the + and − buttons.
+
+Off mode – when the timer expires, recording stops.
+
+On mode – when the timer expires, recording starts.
+
+The timer runs in the background and its status is shown in the status bar.
+
+⌨️ Global Hotkeys
+Hotkey	Action
+Ctrl+Shift+S	Start recording
+Ctrl+Shift+X	Stop recording
+Ctrl+Shift+L	Cycle through available languages
+These hotkeys work globally – the app does not need to be in focus.
+
+🗣️ Voice Commands
+While recording, say any of these phrases to execute the corresponding action:
+
+Command (English)	Action
+copy	Copy selected text
+paste	Paste from clipboard
+enter / new line	Press Enter
+delete all / clear	Clear all text in the active field
+undo / ctrl z	Undo the last action
+change to English (when in Persian)	Switch to English
+persian (when in English)	Switch to Persian
+📦 Building an Executable (Optional)
+You can create a standalone executable (Windows, Linux, macOS) with PyInstaller:
+
+bash
+pip install pyinstaller
+pyinstaller --onefile --windowed --icon=icon.ico Vosk_SpeechToText_v3.py
+You can use the built‑in microphone icon from the code, or provide your own .ico file.
+
+🐧 Linux‑Specific Notes
+To access the microphone, ensure your user is in the audio group:
+
+bash
+sudo usermod -a -G audio $USER
+Some distributions may require additional packages:
+
+bash
+sudo apt install python3-pyqt5 python3-pyqt5.qtsvg
+If audio is not captured, check your default input device in system settings or use pavucontrol.
+
+📂 Folder Structure
+text
+vosk-voice-typing/
+├── Vosk_SpeechToText_v3.py   # Main application
+├── models/                   # Downloaded models (created automatically)
+├── requirements.txt          # Python dependencies
+└── README.md                 # This file
 🛠️ Troubleshooting
 Issue	Possible Solution
-No results appear	Make sure you have typed at least one character – the app only shows results when there is input.
-The correct option is not listed	Try typing a few more characters – the app often needs more context to disambiguate. Also check if your error involves a rare swap not covered; you can suggest additional mappings via GitHub issues.
-Copy doesn’t work	Ensure you have clicked on the result first (to give it focus) before pressing Ctrl+C. Alternatively, use the copy button.
-The window is too small	Resize the window – the output frame adapts automatically.
-The executable doesn’t run	Make sure you have downloaded the correct .exe and that your antivirus isn’t blocking it (it’s a safe Python‑compiled file).
+No models found	Go to Manage Models and download at least one model for your language.
+Microphone not working	Check your system audio input settings. On Linux, ensure you are in the audio group.
+Recognition is inaccurate	Try a larger model (e.g., vosk-model-en-us-0.22 instead of small). Also speak clearly and close to the mic.
+App doesn't type the text	Make sure the target application has focus. If typing fails, the text is copied to the clipboard – just paste it manually.
+Hotkeys not responding	Some applications may intercept global hotkeys. Try running the app as administrator (Windows) or check your system's shortcut settings.
+Executable doesn't run	Ensure you have downloaded the correct .exe and that your antivirus isn't blocking it (it's a safe Python‑compiled file).
 🤝 Contributing & License
 Contributions are welcome! Feel free to open issues or submit pull requests on GitHub.
 
 This project is licensed under the MIT License – see the LICENSE file for details.
 
+👤 Author
+MA.AD.GH
+GitHub | Telegram
+
 🙏 Acknowledgements
-Developed by MA.AD.GH
-For questions or suggestions, reach out via GitHub.
+The Vosk team for their excellent speech recognition engine
 
-A simpler version (V1) with 4 fixed options is also available in the Releases page.
+PyQt5, sounddevice, keyboard, and requests libraries
 
-Enjoy typing in Persian without the headache of wrong keyboard layouts! 🎉
