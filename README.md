@@ -1,5 +1,3 @@
-
-markdown
 [🇬🇧 English](README.md) | [🇮🇷 فارسی](README.fa.md)
 
 # 🧠 Smart Persian Keyboard Corrector
