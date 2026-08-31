@@ -141,7 +141,6 @@ This project is licensed under the MIT License – see the LICENSE file for deta
 
 👤 Author
 MA.AD.GH
-GitHub | Telegram
 
 🙏 Acknowledgements
 Built with Python's built‑in Tkinter – no external dependencies.
