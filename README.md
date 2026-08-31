@@ -1,4 +1,7 @@
-markdown 🇬🇧 English | 🇮🇷 فارسی
+
+```markdown
+[🇬🇧 English](README.md) | [🇮🇷 فارسی](README.fa.md)
+
 # 🧠 Smart Persian Keyboard Corrector – Version 2
 
 **Instantly fix mistyped Persian text** – now with **50 intelligent correction variants**, live preview, pinning, and full clipboard support.
@@ -32,6 +35,9 @@ Version 2 is a **major upgrade** over the basic v1 (which only offered 4 fixed o
 - **Full keyboard shortcuts** – `Ctrl+C`, `Ctrl+V`, `Ctrl+A`, and `Ctrl+X` work everywhere.
 - **Smarter combinations** – automatically mixes Persian and English swap patterns to handle mixed errors.
 - **Right‑click context menu** – available on both input and output areas for quick copy/paste.
+- **Dark theme** – eye‑friendly, comfortable for extended use.
+- **Mouse wheel scrolling** – smoothly scroll through the long list of suggestions.
+- **Portable executable** – no Python installation required – just download and run the `.exe`.
 
 ---
 
@@ -133,14 +139,9 @@ Contributions are welcome! Feel free to open issues or submit pull requests on G
 This project is licensed under the MIT License – see the LICENSE file for details.
 
 🙏 Acknowledgements
-Developed by MA.AD.GH.
+Developed by MA.AD.GH
 For questions or suggestions, reach out via GitHub.
 
+A simpler version (V1) with 4 fixed options is also available in the Releases page.
+
 Enjoy typing in Persian without the headache of wrong keyboard layouts! 🎉
-
-text
-
----
-
-I hope this comprehensive English README meets your needs.  
-If you also want a **Persian (فارسی) version** of this README, just let me know – I’ll translate it for you as well.
