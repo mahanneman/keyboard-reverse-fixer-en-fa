@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShadowCipher Web — معکوس‌سازی کیبورد</title>
+<style>
+  :root{
+    --bg:#0a0d16; --panel:#131824; --card:#1a2030; --card2:#1e2536;
+    --border:#252d42; --text:#e5e9f2; --dim:#8a93a8;
+    --accent:#4d9fff; --accent2:#6fb5ff; --green:#4ade80;
+    --red:#f87171; --yellow:#fbbf24; --purple:#a78bfa;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', Tahoma, sans-serif; padding:18px;
+    min-height:100vh;
+  }
+  h1{
+    color:var(--accent); font-size:1.4rem; margin:0 0 4px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sub{color:var(--dim); font-size:.8rem; margin-bottom:18px}
+
+  .layout{
+    display:grid; grid-template-columns:1fr 1fr; gap:16px;
+    max-width:1200px; margin:0 auto;
+  }
+  @media(max-width:900px){ .layout{grid-template-columns:1fr} }
+
+  .panel{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:14px;
+  }
+  .panel h2{
+    font-size:.95rem; color:var(--accent); margin:0 0 10px;
+    display:flex; align-items:center; gap:6px;
+  }
+  label{display:block; font-size:.78rem; color:var(--dim); margin-bottom:4px}
+  textarea{
+    width:100%; min-height:120px; resize:vertical;
+    background:var(--card); color:var(--text);
+    border:1px solid var(--border); border-radius:8px;
+    padding:10px; font-family:Consolas, monospace; font-size:.95rem;
+    outline:none; line-height:1.6;
+  }
+  textarea:focus{border-color:var(--accent)}
+  input[type=text], input[type=number]{
+    background:var(--card2); color:var(--text);
+    border:1px solid var(--border); border-radius:8px;
+    padding:7px 10px; font-family:Consolas, monospace; font-size:.9rem;
+    outline:none;
+  }
+  input:focus{border-color:var(--accent)}
+
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:8px 0}
+  .row > *{flex:0 0 auto}
+
+  button{
+    background:var(--card2); color:var(--text);
+    border:1px solid var(--border); border-radius:8px;
+    padding:7px 12px; font-size:.82rem; cursor:pointer;
+    font-family:'Segoe UI', Tahoma, sans-serif;
+    transition:background .15s, border-color .15s;
+  }
+  button:hover{background:var(--border); border-color:var(--accent)}
+  button.primary{
+    background:var(--accent); border-color:var(--accent);
+    color:#fff; font-weight:bold;
+  }
+  button.primary:hover{background:var(--accent2); border-color:var(--accent2)}
+  button.danger{background:#2a1e28; color:var(--red); border-color:#3d2a35}
+  button.danger:hover{background:#3d2a35}
+
+  .tools{display:flex; flex-direction:column; gap:14px; max-width:1200px; margin:18px auto 0}
+  .grid-btns{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:6px}
+  .grid-btns button{width:100%; text-align:center; font-size:.8rem}
+
+  .out{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:10px; min-height:80px;
+    font-family:Consolas, monospace; font-size:.95rem;
+    color:var(--green); white-space:pre-wrap; word-break:break-word;
+    line-height:1.6;
+  }
+  .status{font-size:.78rem; color:var(--green); margin-top:8px}
+  .status.err{color:var(--red)}
+  .hint{font-size:.75rem; color:var(--dim); line-height:1.7}
+
+  .badge{
+    display:inline-block; background:var(--card2); border:1px solid var(--border);
+    border-radius:6px; padding:2px 8px; font-size:.72rem; color:var(--dim);
+  }
+
+  .highlight{
+    border-color:var(--accent) !important;
+    box-shadow:0 0 0 2px rgba(77,159,255,.15);
+  }
+</style>
+</head>
+<body>
+
+<h1>◈ ShadowCipher Web</h1>
+<div class="sub">آزمایشگاه رمز · استگانوگرافی · معکوس‌سازی کیبورد</div>
+
+<div class="layout">
+
+  <!-- ستون ورودی -->
+  <div class="panel">
+    <h2>▸ ورودی</h2>
+    <label for="inp">متن را وارد یا جای‌گذاری کنید</label>
+    <textarea id="inp" placeholder="متن اینجا..."></textarea>
+    <div class="row">
+      <button onclick="pasteFromClipboard()">📋 جای‌گذاری</button>
+      <button onclick="clearAll()" class="danger">✕ پاک کردن</button>
+    </div>
+  </div>
+
+  <!-- ستون خروجی -->
+  <div class="panel">
+    <h2>▸ نتیجه</h2>
+    <div id="out" class="out">—</div>
+    <div class="row">
+      <button class="primary" onclick="copyOut()">⎘ کپی نتیجه</button>
+      <span id="status" class="status"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ابزارها -->
+<div class="tools">
+
+  <!-- معکوس‌سازی کیبورد — اولویت اول -->
+  <div class="panel highlight">
+    <h2>⌨ معکوس‌سازی کیبورد فارسی / انگلیسی <span class="badge">اولویت اول</span></h2>
+    <p class="hint">
+      وقتی کیبورد روی زبان اشتباه است و تایپ شما به هم می‌ریزد، این ابزار حروف را بین چیدمان فارسی و انگلیسی جابه‌جا می‌کند.
+      «سلام» ⇄ «sghl» و برعکس.
+    </p>
+    <div class="grid-btns">
+      <button onclick="run(faToEn)">فارسی → انگلیسی</button>
+      <button onclick="run(enToFa)">انگلیسی → فارسی</button>
+      <button onclick="run(swapLayout)">تشخیص خودکار و معکوس</button>
+      <button onclick="run(faToEnReverse)">فارسی → انگلیسی (معکوس)</button>
+      <button onclick="run(enToFaReverse)">انگلیسی → فارسی (معکوس)</button>
+      <button onclick="run(fixMixedLayout)">اصلاح متن ترکیبی</button>
+    </div>
+  </div>
+
+  <!-- رمز کلاسیک -->
+  <div class="panel">
+    <h2>⚔ رمز کلاسیک</h2>
+    <div class="row">
+      <label>کلید:</label>
+      <input type="text" id="key" placeholder="کلید" style="width:140px">
+      <label>N:</label>
+      <input type="number" id="nval" value="2" min="1" max="20" style="width:60px">
+    </div>
+    <div class="grid-btns">
+      <button onclick="run(t=>caesar(t,3))">سزار +۳</button>
+      <button onclick="run(t=>caesar(t,3,true))">سزار −۳</button>
+      <button onclick="run(t=>caesar(t,getN()))">سزار +N</button>
+      <button onclick="run(t=>caesar(t,getN(),true))">سزار −N</button>
+      <button onclick="run(t=>vigenere(t,getKey()))">ویژنر</button>
+      <button onclick="run(t=>vigenere(t,getKey(),true))">ویژنر (رمزگشایی)</button>
+      <button onclick="run(atbash)">Atbash</button>
+      <button onclick="run(rot13)">ROT13</button>
+      <button onclick="run(t=>t.split('').reverse().join(''))">معکوس کل</button>
+      <button onclick="run(t=>t.split(/\s+/).reverse().join(' '))">معکوس کلمات</button>
+      <button onclick="run(t=>t.split('\n').reverse().join('\n'))">معکوس خطوط</button>
+    </div>
+  </div>
+
+  <!-- کدگذاری -->
+  <div class="panel">
+    <h2>🔐 کدگذاری</h2>
+    <div class="grid-btns">
+      <button onclick="run(t=>btoa(unescape(encodeURIComponent(t))))">Base64 →</button>
+      <button onclick="run(t=>decodeURIComponent(escape(atob(t))))">Base64 ←</button>
+      <button onclick="run(t=>[...t].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(' '))">Hex →</button>
+      <button onclick="run(t=>t.split(/\s+/).map(h=>String.fromCharCode(parseInt(h,16))).join(''))">Hex ←</button>
+      <button onclick="run(t=>[...t].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '))">Binary →</button>
+      <button onclick="run(t=>t.split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join(''))">Binary ←</button>
+      <button onclick="run(t=>encodeURIComponent(t))">URL Encode</button>
+      <button onclick="run(t=>decodeURIComponent(t))">URL Decode</button>
+      <button onclick="run(t=>t.replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])))">HTML Escape</button>
+      <button onclick="run(t=>{const d=document.createElement('textarea');d.innerHTML=t;return d.value})">HTML Unescape</button>
+      <button onclick="run(md5)">MD5</button>
+      <button onclick="run(sha256)">SHA-256</button>
+      <button onclick="run(t=>t.replace(/\s+/g,''))">حذف فاصله</button>
+      <button onclick="run(t=>t.replace(/[^a-zA-Z]/g,''))">فقط حروف</button>
+    </div>
+  </div>
+
+  <!-- Morse و ویژه -->
+  <div class="panel">
+    <h2>📡 Morse و ویژه</h2>
+    <div class="grid-btns">
+      <button onclick="run(morseEnc)">Morse →</button>
+      <button onclick="run(morseDec)">Morse ←</button>
+      <button onclick="run(nato)">NATO Phonetic</button>
+      <button onclick="run(braille)">Braille</button>
+      <button onclick="run(t=>t.toLowerCase().replace(/a/g,'4').replace(/e/g,'3').replace(/g/g,'6').replace(/i/g,'1').replace(/l/g,'1').replace(/o/g,'0').replace(/s/g,'5'))">Leet Speak</button>
+    </div>
+  </div>
+
+  <!-- استگانوگرافی -->
+  <div class="panel">
+    <h2>🕵 استگانوگرافی</h2>
+    <div class="grid-btns">
+      <button onclick="run(t=>t.split(/\s+/).filter(Boolean).map(w=>w[0]).join(''))">حرف اول کلمات</button>
+      <button onclick="run(t=>t.split(/\s+/).filter(Boolean).map(w=>w[w.length-1]).join(''))">حرف آخر کلمات</button>
+      <button onclick="run(t=>t.split('\n').filter(Boolean).map(l=>l.trim()[0]).join(''))">حرف اول خطوط</button>
+      <button onclick="run(t=>t.split('\n').filter(Boolean).map(l=>l.trim().slice(-1)).join(''))">حرف آخر خطوط</button>
+      <button onclick="run(t=>t.split('').filter((_,i)=>i%2===0).join(''))">موقعیت زوج</button>
+      <button onclick="run(t=>t.split('').filter((_,i)=>i%2===1).join(''))">موقعیت فرد</button>
+      <button onclick="run(t=>t.split(/\s+/).filter(Boolean).map(w=>w[Math.floor(w.length/2)]).join(''))">حرف وسط</button>
+      <button onclick="run(t=>t.replace(/[^A-Z]/g,''))">حروف بزرگ</button>
+      <button onclick="run(t=>t.replace(/\D/g,''))">فقط اعداد</button>
+      <button onclick="run(t=>t.split('').filter((_,i)=>i%getN()===0).join(''))">هر N کاراکتر</button>
+    </div>
+  </div>
+
+  <!-- تحلیل -->
+  <div class="panel">
+    <h2>📊 تحلیل</h2>
+    <div class="grid-btns">
+      <button onclick="run(analyze)">تحلیل کامل</button>
+      <button onclick="run(t=>String(t.length))">تعداد کاراکتر</button>
+      <button onclick="run(t=>String(t.split(/\s+/).filter(Boolean).length))">تعداد کلمات</button>
+      <button onclick="run(t=>String(t.split('\n').length))">تعداد خطوط</button>
+      <button onclick="run(t=>{const m={};for(const c of t.toLowerCase())if(/[a-zآ-ی]/.test(c))m[c]=(m[c]||0)+1;return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,40).map(([c,n])=>c+' : '+n).join('\n')})">فرکانس حروف</button>
+    </div>
+  </div>
+
+  <!-- فارسی و ابزار -->
+  <div class="panel">
+    <h2>🌙 فارسی و ابزار</h2>
+    <div class="grid-btns">
+      <button onclick="run(t=>t.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))">اعداد فارسی → انگلیسی</button>
+      <button onclick="run(t=>t.replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[+d]))">اعداد انگلیسی → فارسی</button>
+      <button onclick="run(t=>t.replace(/ي/g,'ی').replace(/ك/g,'ک'))">عربی → فارسی</button>
+      <button onclick="run(t=>t.replace(/ی/g,'ي').replace(/ک/g,'ك'))">فارسی → عربی</button>
+      <button onclick="run(t=>t.replace(/[\u064B-\u0652\u0670\u0640]/g,''))">حذف اعراب</button>
+      <button onclick="run(t=>t.replace(/\u0640/g,''))">حذف کشیده</button>
+      <button onclick="run(t=>t.replace(/[ \t]+/g,' ').trim())">یکسان‌سازی فاصله</button>
+      <button onclick="run(t=>crypto.randomUUID?crypto.randomUUID():'UUID نیاز به HTTPS دارد')">UUID v4</button>
+      <button onclick="run(t=>Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join(''))">Hex تصادفی</button>
+      <button onclick="run(t=>String(Date.now()))">Timestamp</button>
+      <button onclick="run(t=>new Date().toLocaleString('fa-IR'))">تاریخ/ساعت</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   نقشه کیبورد فارسی ↔ انگلیسی
+   بر اساس چیدمان استاندارد ویندوز
+   ═══════════════════════════════════════════════ */
+const FA_TO_EN = {
+  'ض':'q','ص':'w','ث':'e','ق':'r','ف':'t','غ':'y','ع':'u','ه':'i','خ':'o','ح':'p',
+  'ش':'a','س':'s','ی':'d','ب':'f','ل':'g','ا':'h','ت':'j','ن':'k','م':'l',
+  'ظ':'z','ط':'x','ز':'c','ر':'v','ذ':'b','د':'n','پ':'m',
+  'ژ':']','چ':'[','آ':']','ة':'[',
+  'ئ':'d','ء':'h','أ':'h','إ':'h','ؤ':'d','ً':'','ٌ':'','ٍ':'','َ':'','ُ':'','ِ':'',
+  'ّ':'','ْ':'','ٔ':'','ٰ':'','٬':'','٫':'',
+  'گ':"'",'ك':'n','ي':'d','ۀ':'i','ى':'d',
+  '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
+  ' ': ' ', '\n':'\n', '\u200c':' '
+};
+
+const EN_TO_FA = {};
+for (const [fa,en] of Object.entries(FA_TO_EN)){
+  if (en && !EN_TO_FA[en]) EN_TO_FA[en] = fa;
+}
+// چند اصلاح مهم
+EN_TO_FA['q']='ض'; EN_TO_FA['w']='ص'; EN_TO_FA['e']='ث'; EN_TO_FA['r']='ق';
+EN_TO_FA['t']='ف'; EN_TO_FA['y']='غ'; EN_TO_FA['u']='ع'; EN_TO_FA['i']='ه';
+EN_TO_FA['o']='خ'; EN_TO_FA['p']='ح'; EN_TO_FA['a']='ش'; EN_TO_FA['s']='س';
+EN_TO_FA['d']='ی'; EN_TO_FA['f']='ب'; EN_TO_FA['g']='ل'; EN_TO_FA['h']='ا';
+EN_TO_FA['j']='ت'; EN_TO_FA['k']='ن'; EN_TO_FA['l']='م'; EN_TO_FA['z']='ظ';
+EN_TO_FA['x']='ط'; EN_TO_FA['c']='ز'; EN_TO_FA['v']='ر'; EN_TO_FA['b']='ذ';
+EN_TO_FA['n']='د'; EN_TO_FA['m']='پ'; EN_TO_FA['[']='چ'; EN_TO_FA[']']='ژ';
+EN_TO_FA["'"]='گ';
+EN_TO_FA['0']='۰'; EN_TO_FA['1']='۱'; EN_TO_FA['2']='۲'; EN_TO_FA['3']='۳';
+EN_TO_FA['4']='۴'; EN_TO_FA['5']='۵'; EN_TO_FA['6']='۶'; EN_TO_FA['7']='۷';
+EN_TO_FA['8']='۸'; EN_TO_FA['9']='۹';
+
+/* ─── تشخیص حروف فارسی/انگلیسی ─── */
+function isFa(ch){ return /[\u0600-\u06FF]/.test(ch); }
+function isEn(ch){ return /[A-Za-z]/.test(ch); }
+
+/* ─── تبدیل فارسی به انگلیسی ─── */
+function faToEn(text){
+  let out = '';
+  for (const ch of text){
+    if (FA_TO_EN[ch] !== undefined) out += FA_TO_EN[ch];
+    else out += ch;
+  }
+  return out;
+}
+
+/* ─── تبدیل انگلیسی به فارسی ─── */
+function enToFa(text){
+  let out = '';
+  for (const ch of text){
+    const lower = ch.toLowerCase();
+    if (EN_TO_FA[lower] !== undefined){
+      // اگر حرف بزرگ بود، همان حرف فارسی را برگردان
+      out += EN_TO_FA[lower];
+    } else out += ch;
+  }
+  return out;
+}
+
+/* ─── معکوس با تشخیص خودکار ─── */
+function swapLayout(text){
+  let fa = 0, en = 0;
+  for (const ch of text){
+    if (isFa(ch)) fa++;
+    else if (isEn(ch)) en++;
+  }
+  if (fa > en) return faToEn(text);
+  if (en > fa) return enToFa(text);
+  return faToEn(text);
+}
+
+/* ─── فارسی → انگلیسی با معکوس کردن ترتیب ─── */
+function faToEnReverse(text){
+  return faToEn(text).split('').reverse().join('');
+}
+
+/* ─── انگلیسی → فارسی با معکوس کردن ترتیب ─── */
+function enToFaReverse(text){
+  return enToFa(text).split('').reverse().join('');
+}
+
+/* ─── اصلاح متن ترکیبی: هر بخش را بر اساس زبانش تبدیل کن ─── */
+function fixMixedLayout(text){
+  // اگر اکثر متن فارسی است، بخش‌های انگلیسی را به فارسی تبدیل کن
+  let fa = 0, en = 0;
+  for (const ch of text){
+    if (isFa(ch)) fa++;
+    else if (isEn(ch)) en++;
+  }
+  if (fa >= en){
+    // تبدیل بخش‌های انگلیسی به فارسی
+    return text.replace(/[A-Za-z]+/g, m => enToFa(m));
+  } else {
+    return text.replace(/[\u0600-\u06FF]+/g, m => faToEn(m));
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ابزارهای رمز کلاسیک
+   ═══════════════════════════════════════════════ */
+const LATIN = 'abcdefghijklmnopqrstuvwxyz';
+
+function caesar(text, shift, decrypt=false){
+  const s = decrypt ? -shift : shift;
+  let out = '';
+  for (const ch of text){
+    if (ch >= 'a' && ch <= 'z')
+      out += String.fromCharCode(((ch.charCodeAt(0)-97+s)%26+26)%26+97);
+    else if (ch >= 'A' && ch <= 'Z')
+      out += String.fromCharCode(((ch.charCodeAt(0)-65+s)%26+26)%26+65);
+    else out += ch;
+  }
+  return out;
+}
+
+function vigenere(text, key, decrypt=false){
+  if (!key) throw new Error('کلید لازم است');
+  key = key.toLowerCase().replace(/[^a-z]/g,'') || 'a';
+  let res = '', ki = 0;
+  for (const ch of text){
+    const low = ch.toLowerCase();
+    if (LATIN.includes(low)){
+      let shift = LATIN.indexOf(key[ki % key.length]);
+      if (decrypt) shift = -shift;
+      const idx = (LATIN.indexOf(low)+shift+26)%26;
+      const newC = LATIN[idx];
+      res += (ch === ch.toUpperCase() && ch !== ch.toLowerCase()) ? newC.toUpperCase() : newC;
+      ki++;
+    } else res += ch;
+  }
+  return res;
+}
+
+function atbash(text){
+  let out = '';
+  for (const ch of text){
+    if (ch >= 'a' && ch <= 'z') out += String.fromCharCode(122-(ch.charCodeAt(0)-97));
+    else if (ch >= 'A' && ch <= 'Z') out += String.fromCharCode(90-(ch.charCodeAt(0)-65));
+    else out += ch;
+  }
+  return out;
+}
+
+function rot13(text){ return caesar(text, 13); }
+
+/* ═══════════════════════════════════════════════
+   Morse
+   ═══════════════════════════════════════════════ */
+const MORSE = {
+  a:'.-',b:'-...',c:'-.-.',d:'-..',e:'.',f:'..-.',g:'--.',h:'....',i:'..',
+  j:'.---',k:'-.-',l:'.-..',m:'--',n:'-.',o:'---',p:'.--.',q:'--.-',r:'.-.',
+  s:'...',t:'-',u:'..-',v:'...-',w:'.--',x:'-..-',y:'-.--',z:'--..',
+  0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',
+  7:'--...',8:'---..',9:'----.'
+};
+const MORSE_R = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+
+function morseEnc(t){
+  return [...t].map(c => MORSE[c.toLowerCase()] || '').filter(Boolean).join(' ');
+}
+function morseDec(t){
+  return t.trim().split(/\s+/).map(c => MORSE_R[c] || ' ').join('');
+}
+
+/* ═══════════════════════════════════════════════
+   NATO / Braille
+   ═══════════════════════════════════════════════ */
+const NATO = {
+  a:'Alpha',b:'Bravo',c:'Charlie',d:'Delta',e:'Echo',f:'Foxtrot',g:'Golf',
+  h:'Hotel',i:'India',j:'Juliett',k:'Kilo',l:'Lima',m:'Mike',n:'November',
+  o:'Oscar',p:'Papa',q:'Quebec',r:'Romeo',s:'Sierra',t:'Tango',u:'Uniform',
+  v:'Victor',w:'Whiskey',x:'X-ray',y:'Yankee',z:'Zulu'
+};
+function nato(t){
+  return [...t].map(c => NATO[c.toLowerCase()] || c).join(' ');
+}
+
+const BRAILLE = {
+  a:'⠁',b:'⠃',c:'⠉',d:'⠙',e:'⠑',f:'⠋',g:'⠛',h:'⠓',i:'⠊',j:'⠚',
+  k:'⠅',l:'⠇',m:'⠍',n:'⠝',o:'⠕',p:'⠏',q:'⠟',r:'⠗',s:'⠎',t:'⠞',
+  u:'⠥',v:'⠧',w:'⠺',x:'⠭',y:'⠽',z:'⠵',' ':' '
+};
+function braille(t){
+  return [...t].map(c => BRAILLE[c.toLowerCase()] || c).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   تحلیل
+   ═══════════════════════════════════════════════ */
+function analyze(t){
+  const words = t.match(/\S+/g) || [];
+  const lines = t.split('\n');
+  const letters = [...t].filter(c => /[a-zA-Z\u0600-\u06FF]/.test(c));
+  const freq = {};
+  for (const c of letters){ const k = c.toLowerCase(); freq[k] = (freq[k]||0)+1; }
+  const topFreq = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,30)
+    .map(([c,n]) => '   ' + c + ' : ' + n).join('\n');
+  return [
+    '◆ کاراکتر : ' + t.length,
+    '◆ کلمه     : ' + words.length,
+    '◆ خط       : ' + lines.length,
+    '◆ حروف یکتا : ' + Object.keys(freq).length,
+    '◆ کلمات یکتا: ' + new Set(words).size,
+    '◆ میانگین طول کلمه: ' + (words.length ? (words.reduce((s,w)=>s+w.length,0)/words.length).toFixed(2) : '0'),
+    '',
+    '◆ فرکانس حروف (۳۰ اول):',
+    topFreq
+  ].join('\n');
+}
+
+/* ═══════════════════════════════════════════════
+   هش‌ها (با Web Crypto API)
+   ═══════════════════════════════════════════════ */
+async function sha256(t){
+  const buf = new TextEncoder().encode(t);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* MD5 — پیاده‌سازی سبک برای مرورگر */
+function md5(str){
+  // پیاده‌سازی MD5 (نسخه فشرده)
+  function safeAdd(x,y){const lsw=(x&0xFFFF)+(y&0xFFFF);const msw=(x>>16)+(y>>16)+(lsw>>16);return (msw<<16)|(lsw&0xFFFF);}
+  function bitRotateLeft(num,cnt){return (num<<cnt)|(num>>>(32-cnt));}
+  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|(~b&d),a,b,x,s,t);}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&~d),a,b,x,s,t);}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|~d),a,b,x,s,t);}
+  function binlMD5(x,len){
+    x[len>>5]|=0x80<<((len)%32);
+    x[(((len+64)>>>9)<<4)+14]=len;
+    let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+    for(let i=0;i<x.length;i+=16){
+      const olda=a,oldb=b,oldc=c,oldd=d;
+      a=md5ff(a,b,c,d,x[i],7,-680876936);
+      d=md5ff(d,a,b,c,x[i+1],12,-389564586);
+      c=md5ff(c,d,a,b,x[i+2],17,606105819);
+      b=md5ff(b,c,d,a,x[i+3],22,-1044525330);
+      a=md5ff(a,b,c,d,x[i+4],7,-176418897);
+      d=md5ff(d,a,b,c,x[i+5],12,1200080426);
+      c=md5ff(c,d,a,b,x[i+6],17,-1473231341);
+      b=md5ff(b,c,d,a,x[i+7],22,-45705983);
+      a=md5ff(a,b,c,d,x[i+8],7,1770035416);
+      d=md5ff(d,a,b,c,x[i+9],12,-1958414417);
+      c=md5ff(c,d,a,b,x[i+10],17,-42063);
+      b=md5ff(b,c,d,a,x[i+11],22,-1990404162);
+      a=md5ff(a,b,c,d,x[i+12],7,1804603682);
+      d=md5ff(d,a,b,c,x[i+13],12,-40341101);
+      c=md5ff(c,d,a,b,x[i+14],17,-1502002290);
+      b=md5ff(b,c,d,a,x[i+15],22,1236535329);
+      a=md5gg(a,b,c,d,x[i+1],5,-165796510);
+      d=md5gg(d,a,b,c,x[i+6],9,-1069501632);
+      c=md5gg(c,d,a,b,x[i+11],14,643717713);
+      b=md5gg(b,c,d,a,x[i],20,-373897302);
+      a=md5gg(a,b,c,d,x[i+5],5,-701558691);
+      d=md5gg(d,a,b,c,x[i+10],9,38016083);
+      c=md5gg(c,d,a,b,x[i+15],14,-660478335);
+      b=md5gg(b,c,d,a,x[i+4],20,-405537848);
+      a=md5gg(a,b,c,d,x[i+9],5,568446438);
+      d=md5gg(d,a,b,c,x[i+14],9,-1019803690);
+      c=md5gg(c,d,a,b,x[i+3],14,-187363961);
+      b=md5gg(b,c,d,a,x[i+8],20,1163531501);
+      a=md5gg(a,b,c,d,x[i+13],5,-1444681467);
+      d=md5gg(d,a,b,c,x[i+2],9,-51403784);
+      c=md5gg(c,d,a,b,x[i+7],14,1735328473);
+      b=md5gg(b,c,d,a,x[i+12],20,-1926607734);
+      a=md5hh(a,b,c,d,x[i+5],4,-378558);
+      d=md5hh(d,a,b,c,x[i+8],11,-2022574463);
+      c=md5hh(c,d,a,b,x[i+11],16,1839030562);
+      b=md5hh(b,c,d,a,x[i+14],23,-35309556);
+      a=md5hh(a,b,c,d,x[i+1],4,-1530992060);
+      d=md5hh(d,a,b,c,x[i+4],11,1272893353);
+      c=md5hh(c,d,a,b,x[i+7],16,-155497632);
+      b=md5hh(b,c,d,a,x[i+10],23,-1094730640);
+      a=md5hh(a,b,c,d,x[i+13],4,681279174);
+      d=md5hh(d,a,b,c,x[i],11,-358537222);
+      c=md5hh(c,d,a,b,x[i+3],16,-722521979);
+      b=md5hh(b,c,d,a,x[i+6],23,76029189);
+      a=md5hh(a,b,c,d,x[i+9],4,-640364487);
+      d=md5hh(d,a,b,c,x[i+12],11,-421815835);
+      c=md5hh(c,d,a,b,x[i+15],16,530742520);
+      b=md5hh(b,c,d,a,x[i+2],23,-995338651);
+      a=md5ii(a,b,c,d,x[i],6,-198630844);
+      d=md5ii(d,a,b,c,x[i+7],10,1126891415);
+      c=md5ii(c,d,a,b,x[i+14],15,-1416354905);
+      b=md5ii(b,c,d,a,x[i+5],21,-57434055);
+      a=md5ii(a,b,c,d,x[i+12],6,1700485571);
+      d=md5ii(d,a,b,c,x[i+3],10,-1894986606);
+      c=md5ii(c,d,a,b,x[i+10],15,-1051523);
+      b=md5ii(b,c,d,a,x[i+1],21,-2054922799);
+      a=md5ii(a,b,c,d,x[i+8],6,1873313359);
+      d=md5ii(d,a,b,c,x[i+15],10,-30611744);
+      c=md5ii(c,d,a,b,x[i+6],15,-1560198380);
+      b=md5ii(b,c,d,a,x[i+13],21,1309151649);
+      a=md5ii(a,b,c,d,x[i+4],6,-145523070);
+      d=md5ii(d,a,b,c,x[i+11],10,-1120210379);
+      c=md5ii(c,d,a,b,x[i+2],15,718787259);
+      b=md5ii(b,c,d,a,x[i+9],21,-343485551);
+      a=safeAdd(a,olda);b=safeAdd(b,oldb);c=safeAdd(c,oldc);d=safeAdd(d,oldd);
+    }
+    return [a,b,c,d];
+  }
+  function binl2rstr(input){
+    let output='';
+    for(let i=0;i<input.length*32;i+=8)
+      output+=String.fromCharCode((input[i>>5]>>>(i%32))&0xFF);
+    return output;
+  }
+  function rstr2binl(input){
+    const output=[];
+    for(let i=0;i<input.length*8;i+=8)
+      output[i>>5]=(output[i>>5]||0)|((input.charCodeAt(i/8)&0xFF)<<(i%32));
+    return output;
+  }
+  function rstrMD5(s){ return binl2rstr(binlMD5(rstr2binl(s), s.length*8)); }
+  function rstr2hex(input){
+    const hexTab='0123456789abcdef';
+    let output='';
+    for(let i=0;i<input.length;i++){
+      const x=input.charCodeAt(i);
+      output+=hexTab.charAt((x>>>4)&0x0F)+hexTab.charAt(x&0x0F);
+    }
+    return output;
+  }
+  function str2rstrUTF8(input){
+    return unescape(encodeURIComponent(input));
+  }
+  return rstr2hex(rstrMD5(str2rstrUTF8(str)));
+}
+
+/* ═══════════════════════════════════════════════
+   هسته اجرا
+   ═══════════════════════════════════════════════ */
+const inp = document.getElementById('inp');
+const out = document.getElementById('out');
+const statusEl = document.getElementById('status');
+
+function getKey(){ return document.getElementById('key').value; }
+function getN(){ const v = parseInt(document.getElementById('nval').value,10); return isNaN(v)||v<1 ? 2 : v; }
+
+function setOut(text, err=false){
+  out.textContent = text;
+  out.style.color = err ? 'var(--red)' : 'var(--green)';
+}
+
+function setStatus(msg, err=false){
+  statusEl.textContent = msg;
+  statusEl.className = 'status' + (err?' err':'');
+}
+
+async function run(fn){
+  const text = inp.value;
+  try{
+    let result = fn(text);
+    if (result instanceof Promise) result = await result;
+    result = String(result);
+    setOut(result);
+    setStatus('✓ انجام شد · طول نتیجه: ' + result.length);
+  }catch(e){
+    setOut('✕ خطا: ' + e.name + '\n' + e.message, true);
+    setStatus('✕ خطا در اجرا', true);
+  }
+}
+
+function copyOut(){
+  const text = out.textContent;
+  if (!text || text === '—'){ setStatus('نتیجه‌ای برای کپی وجود ندارد', true); return; }
+  navigator.clipboard.writeText(text).then(()=>{
+    setStatus('⎘ نتیجه در کلیپ‌بورد کپی شد');
+  }).catch(()=>{
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    setStatus('⎘ نتیجه در کلیپ‌بورد کپی شد');
+  });
+}
+
+function pasteFromClipboard(){
+  navigator.clipboard.readText().then(t=>{
+    inp.value = t;
+    setStatus('📋 متن از کلیپ‌بورد جای‌گذاری شد');
+  }).catch(()=>{
+    setStatus('دسترسی به کلیپ‌بورد ممکن نیست — دستی Ctrl+V کنید', true);
+  });
+}
+
+function clearAll(){
+  inp.value = '';
+  out.textContent = '—';
+  out.style.color = 'var(--green)';
+  document.getElementById('key').value = '';
+  document.getElementById('nval').value = '2';
+  setStatus('✕ همه پاک شد');
+}
+
+/* Enter در کلید = اجرای معکوس خودکار */
+document.getElementById('key').addEventListener('keydown', e=>{
+  if (e.key === 'Enter'){ e.preventDefault(); run(swapLayout); }
+});
+
+/* Ctrl+Enter در textarea = اجرای معکوس خودکار */
+inp.addEventListener('keydown', e=>{
+  if (e.ctrlKey && e.key === 'Enter'){ e.preventDefault(); run(swapLayout); }
+});
+
+/* فوکوس خودکار */
+inp.focus();
+
+/* پیام خوش‌آمد */
+setStatus('آماده — متن را وارد کنید');
+</script>
+</body>
+</html>
